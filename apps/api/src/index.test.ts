@@ -94,5 +94,6 @@ describe('CheckHere documentation Worker', () => {
     expect(example.status).toBe(200);
     expect(markdown.headers.get('content-type')).toContain('text/markdown');
     expect(reportJson.headers.get('content-type')).toContain('application/json');
+    await expect(reportJson.clone().json()).resolves.toMatchObject({ result: 'ready', score: 100, issues: [] });
   });
 });
