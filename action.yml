@@ -172,7 +172,8 @@ runs:
       with:
         name: ${{ inputs.artifact-name }}
         path: ${{ github.workspace }}/.checkhere-action
-        if-no-files-found: warn
+        if-no-files-found: error
+        include-hidden-files: true
         retention-days: ${{ inputs.retention-days }}
 
 branding:
