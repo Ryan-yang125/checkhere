@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - v*
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to rebuild
+        required: true
+        default: v0.4.0
+        type: string
 
 permissions:
   contents: write
@@ -17,6 +24,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -54,7 +63,7 @@ jobs:
 
       - name: Verify packaged CLI
         run: |
-          npm install --global "${{ steps.assets.outputs.tarball }}"
+          npm install --global "./${{ steps.assets.outputs.tarball }}"
           checkhere --version
           checkhere doctor
 
@@ -65,16 +74,18 @@ jobs:
             dist-release/checkhere-*.tgz
             dist-release/checkhere-skill.zip
             dist-release/checkhere.skill
+            dist-release/SHA256SUMS.txt
 
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
         run: |
           set -Eeuo pipefail
-          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" dist-release/* --clobber --repo "$GITHUB_REPOSITORY"
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" dist-release/* --clobber --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$GITHUB_REF_NAME" dist-release/* --verify-tag --generate-notes --title "CheckHere $GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY"
+            gh release create "$RELEASE_TAG" dist-release/* --verify-tag --generate-notes --title "CheckHere $RELEASE_TAG" --repo "$GITHUB_REPOSITORY"
           fi
 
     defaults:

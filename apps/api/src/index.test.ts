@@ -16,7 +16,7 @@ describe('CheckHere documentation Worker', () => {
     expect(body).toContain('FREE · OPEN SOURCE · LOCAL FIRST');
     expect(body).toContain('checkhere setup');
     expect(body).toContain('https://github.com/Ryan-yang125/checkhere');
-    expect(body).toContain('/example-report');
+    expect(body).toContain('/examples/v0.4.0/report');
     expect(body).not.toContain('<form');
     expect(body).not.toContain('fetch(');
 
@@ -77,9 +77,9 @@ describe('CheckHere documentation Worker', () => {
     const [llms, sitemap, example, markdown, reportJson] = await Promise.all([
       fetchPath('/llms.txt'),
       fetchPath('/sitemap.xml'),
-      fetchPath('/example-report'),
-      fetchPath('/example-report.md'),
-      fetchPath('/example-report.json')
+      fetchPath('/examples/v0.4.0/report'),
+      fetchPath('/examples/v0.4.0/report.md'),
+      fetchPath('/examples/v0.4.0/report.json')
     ]);
 
     const llmsBody = await llms.text();
@@ -91,8 +91,11 @@ describe('CheckHere documentation Worker', () => {
     expect(llmsBody).not.toContain('VPS');
     expect(llmsBody).not.toContain('hosted');
     expect(sitemapBody).toContain('<loc>https://checkhere.page/guides/ai-website-launch-checklist</loc>');
+    expect(sitemapBody).toContain('<loc>https://checkhere.page/examples/v0.4.0/report</loc>');
     expect(example.status).toBe(200);
+    expect(example.headers.get('cache-control')).toBe('no-store');
     expect(markdown.headers.get('content-type')).toContain('text/markdown');
+    expect(markdown.headers.get('cache-control')).toBe('no-store');
     expect(reportJson.headers.get('content-type')).toContain('application/json');
     await expect(reportJson.clone().json()).resolves.toMatchObject({ result: 'ready', score: 100, issues: [] });
   });

@@ -21,6 +21,7 @@ type DocPage = {
 const GITHUB_URL = 'https://github.com/Ryan-yang125/checkhere';
 const RELEASE_VERSION = '0.4.0';
 const UPDATED_AT = '2026-07-23';
+const EXAMPLE_REPORT_PATH = '/examples/v0.4.0/report';
 
 const DOC_PAGES: Record<string, DocPage> = {
   '/docs/cli': {
@@ -74,6 +75,7 @@ const DOC_PAGES: Record<string, DocPage> = {
       {
         heading: '获取 Skill',
         paragraphs: ['Skill 源文件随开源仓库发布，目录遵循 Agent Skills 的 SKILL.md 结构。安装方式和最新兼容列表以仓库说明为准。'],
+        bullets: ['Skills.sh 收录页：https://skills.sh/ryan-yang125/checkhere/checkhere'],
         code: 'gh skill install Ryan-yang125/checkhere checkhere@v0.4.0 --agent codex --scope user\nnpx skills add Ryan-yang125/checkhere --skill checkhere --agent codex -y'
       },
       {
@@ -322,9 +324,9 @@ function route(request: Request, env: Env): Response {
   if (url.pathname === '/sitemap.xml') return sitemapXml(base, method);
   if (url.pathname === '/favicon.svg') return favicon(method);
   if (url.pathname === '/og.svg') return ogImage(method);
-  if (url.pathname === '/example-report') return exampleReport(base, method);
-  if (url.pathname === '/example-report.md') return exampleMarkdown(method);
-  if (url.pathname === '/example-report.json') return exampleJson(method);
+  if (url.pathname === EXAMPLE_REPORT_PATH || url.pathname === '/example-report') return exampleReport(base, method);
+  if (url.pathname === EXAMPLE_REPORT_PATH + '.md' || url.pathname === '/example-report.md') return exampleMarkdown(method);
+  if (url.pathname === EXAMPLE_REPORT_PATH + '.json' || url.pathname === '/example-report.json') return exampleJson(method);
 
   const page = DOC_PAGES[url.pathname];
   if (page) return docPage(base, url.pathname, page, method);
@@ -361,7 +363,7 @@ function home(base: string, method: string): Response {
     '<div class="eyebrow">FREE · OPEN SOURCE · LOCAL FIRST</div>',
     '<h1>AI 建站交付前，<br>跑一次真实浏览器验收</h1>',
     '<p class="hero-copy">CheckHere 在本机启动 Chromium，检查桌面与移动端页面，生成截图、问题证据和 Agent 可读报告。代码开源，所有检查免费。</p>',
-    '<div class="hero-actions"><a class="button primary" href="' + GITHUB_URL + '">查看 GitHub</a><a class="button" href="/docs/cli">阅读 CLI 文档</a><a class="text-link" href="/example-report">查看固定示例报告 →</a></div>',
+    '<div class="hero-actions"><a class="button primary" href="' + GITHUB_URL + '">查看 GitHub</a><a class="button" href="/docs/cli">阅读 CLI 文档</a><a class="text-link" href="' + EXAMPLE_REPORT_PATH + '">查看固定示例报告 →</a></div>',
     '<div class="terminal" aria-label="安装和运行命令"><div class="terminal-bar"><span></span><span></span><span></span><b>终端</b></div><pre><code><em>$</em> curl -fsSL https://checkhere.page/install.sh | bash\n<em>$</em> checkhere setup\n<em>$</em> checkhere https://your-site.com</code></pre></div>',
     '<div class="facts"><div><span>运行位置</span><strong>本机 / CI</strong></div><div><span>浏览器</span><strong>Playwright Chromium</strong></div><div><span>报告</span><strong>HTML · Markdown · JSON</strong></div><div><span>价格</span><strong>¥0</strong></div></div>',
     '</section>',
@@ -369,7 +371,7 @@ function home(base: string, method: string): Response {
     '<section class="wrap split-section"><div class="panel"><div class="eyebrow">AGENT SKILL</div><h2>让 Coding Agent 自己检查、修复、复检</h2><p>仓库内置 CheckHere Skill。Agent 启动项目后运行本地 CLI，打开 HTML 报告给你看，再读取 Markdown 或 JSON 完成修复。</p><a class="text-link" href="/docs/skill">查看 Skill 工作流 →</a></div><div class="panel dark"><div class="eyebrow">PROMPT</div><pre><code>请使用 CheckHere Skill 检查\nhttp://localhost:3000，\n打开报告，修复后复检。</code></pre><a class="text-link light" href="' + GITHUB_URL + '/tree/main/skills/checkhere">GitHub 中查看 Skill →</a></div></section>',
     '<section class="wrap section-block"><div class="section-heading"><div><div class="eyebrow">RELEASE GATE</div><h2>放进 GitHub Actions</h2></div><a class="text-link" href="/docs/github-actions">完整配置 →</a></div><div class="code-card"><pre><code>checkhere ci https://preview.example.com --fail-on=critical\ncheckhere ci https://preview.example.com --fail-on=score:90\ncheckhere ci https://preview.example.com --routes routes.txt --fail-on=page-score:80</code></pre></div></section>',
     '<section class="band"><div class="wrap section-block"><div class="eyebrow">CHECK LIBRARY</div><h2>从真实问题进入文档</h2><div class="link-grid"><a href="/checks/broken-image"><span>BROKEN_IMAGE</span><strong>坏图与资源路径</strong><p>请求失败、自然尺寸和截图证据。</p></a><a href="/checks/mobile-overflow"><span>MOBILE_OVERFLOW</span><strong>移动端横向溢出</strong><p>视口宽度、超宽元素和响应式布局。</p></a><a href="/checks/console-error"><span>CONSOLE_ERROR</span><strong>浏览器运行时错误</strong><p>console error、page error 和失败请求。</p></a><a href="/guides/ai-website-launch-checklist"><span>GUIDE</span><strong>AI 建站上线清单</strong><p>从关键路由到 CI 门槛的完整验收顺序。</p></a></div></div></section>',
-    '<section class="wrap example-section"><div><div class="eyebrow">FIXED EXAMPLE</div><h2>先看看最终报告长什么样</h2><p>这是由本地 CLI 生成并公开保存的固定参考报告。每位用户的新检查都在自己的机器或 CI runner 内完成。</p></div><div class="example-actions"><a class="button primary" href="/example-report">打开 HTML 示例</a><a class="button" href="/example-report.md">查看 Markdown</a><a class="button" href="/example-report.json">查看 JSON</a></div></section>',
+    '<section class="wrap example-section"><div><div class="eyebrow">FIXED EXAMPLE</div><h2>先看看最终报告长什么样</h2><p>这是由本地 CLI 生成并公开保存的固定参考报告。每位用户的新检查都在自己的机器或 CI runner 内完成。</p></div><div class="example-actions"><a class="button primary" href="' + EXAMPLE_REPORT_PATH + '">打开 HTML 示例</a><a class="button" href="' + EXAMPLE_REPORT_PATH + '.md">查看 Markdown</a><a class="button" href="' + EXAMPLE_REPORT_PATH + '.json">查看 JSON</a></div></section>',
     '</main>',
     siteFooter(),
   ].join('\n');
@@ -572,9 +574,9 @@ function llmsTxt(base: string, method: string): Response {
     '',
     '## Fixed example',
     '',
-    '- HTML: ' + base + '/example-report',
-    '- Markdown: ' + base + '/example-report.md',
-    '- JSON: ' + base + '/example-report.json',
+    '- HTML: ' + base + EXAMPLE_REPORT_PATH,
+    '- Markdown: ' + base + EXAMPLE_REPORT_PATH + '.md',
+    '- JSON: ' + base + EXAMPLE_REPORT_PATH + '.json',
     '',
     'The example links are read-only reference artifacts. New scans run locally.',
     ''
@@ -615,7 +617,7 @@ function exampleReport(base: string, method: string): Response {
     '@type': 'TechArticle',
     headline: title,
     description,
-    url: base + '/example-report',
+    url: base + EXAMPLE_REPORT_PATH,
     dateModified: UPDATED_AT
   };
   const body = [
@@ -628,11 +630,11 @@ function exampleReport(base: string, method: string): Response {
     '<article class="report-card"><strong>桌面截图</strong><div class="shot"><h3>CheckHere</h3><p>AI 建站交付前，跑一次真实浏览器验收</p></div></article>',
     '<article class="report-card"><strong>移动端截图</strong><div class="shot" style="max-width:240px"><h3>CheckHere</h3><p>本地浏览器验收</p></div></article>',
     '</div>',
-    '<div class="example-actions"><a class="button primary" href="/example-report.md">Agent Markdown</a><a class="button" href="/example-report.json">JSON 数据</a><a class="button" href="/docs/cli">自己运行一次</a></div>',
+    '<div class="example-actions"><a class="button primary" href="' + EXAMPLE_REPORT_PATH + '.md">Agent Markdown</a><a class="button" href="' + EXAMPLE_REPORT_PATH + '.json">JSON 数据</a><a class="button" href="/docs/cli">自己运行一次</a></div>',
     '</main>',
     siteFooter()
   ].join('\n');
-  return html(documentPage(title, description, base + '/example-report', base, schema, body), method);
+  return htmlNoStore(documentPage(title, description, base + EXAMPLE_REPORT_PATH, base, schema, body), method);
 }
 
 function exampleMarkdown(method: string): Response {
@@ -660,7 +662,7 @@ function exampleMarkdown(method: string): Response {
     ''
   ].join('\n');
   return new Response(method === 'HEAD' ? null : body, {
-    headers: { 'content-type': 'text/markdown; charset=utf-8', 'cache-control': 'public, max-age=3600' }
+    headers: { 'content-type': 'text/markdown; charset=utf-8', 'cache-control': 'no-store' }
   });
 }
 
@@ -688,7 +690,7 @@ function robotsTxt(base: string, method: string): Response {
 }
 
 function sitemapXml(base: string, method: string): Response {
-  const paths = ['/', ...Object.keys(DOC_PAGES), '/example-report'];
+  const paths = ['/', ...Object.keys(DOC_PAGES), EXAMPLE_REPORT_PATH];
   const urls = paths.map((path) => [
     '  <url>',
     '    <loc>' + escapeXml(base + path) + '</loc>',
@@ -758,6 +760,12 @@ function siteFooter(): string {
 function html(body: string, method: string): Response {
   return new Response(method === 'HEAD' ? null : body, {
     headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=300' }
+  });
+}
+
+function htmlNoStore(body: string, method: string): Response {
+  return new Response(method === 'HEAD' ? null : body, {
+    headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' }
   });
 }
 
