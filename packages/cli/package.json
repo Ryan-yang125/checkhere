@@ -1,0 +1,53 @@
+{
+  "name": "checkhere",
+  "version": "0.4.0",
+  "description": "Local-first browser release checks for AI-built websites",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "browser-testing",
+    "playwright",
+    "lighthouse",
+    "release-gate",
+    "cli"
+  ],
+  "homepage": "https://checkhere.page/docs/cli",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ryan-yang125/checkhere.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/Ryan-yang125/checkhere/issues"
+  },
+  "bin": {
+    "checkhere": "dist/checkhere.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "preferGlobal": true,
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "prepack": "npm run build",
+    "test": "vitest run --root ../.. packages/cli/src/index.test.ts"
+  },
+  "dependencies": {
+    "chrome-launcher": "1.2.1",
+    "fast-xml-parser": "5.10.1",
+    "lighthouse": "12.6.1",
+    "playwright": "1.61.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.4",
+    "esbuild": "^0.25.5"
+  }
+}

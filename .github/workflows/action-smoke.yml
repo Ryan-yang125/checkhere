@@ -1,0 +1,53 @@
+name: Action smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: npm package spec or release tarball URL
+        required: true
+        default: https://github.com/Ryan-yang125/checkhere/releases/download/v0.4.0/checkhere-0.4.0.tgz
+        type: string
+      url:
+        description: Public URL reachable from the GitHub runner
+        required: true
+        default: https://checkhere.page
+        type: string
+      fail-on:
+        description: CheckHere release gate
+        required: true
+        default: critical
+        type: choice
+        options:
+          - critical
+          - fix_soon
+          - score:80
+          - page-score:80
+          - never
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run published CheckHere Action
+        id: checkhere
+        uses: ./
+        with:
+          package: ${{ inputs.package }}
+          url: ${{ inputs.url }}
+          fail-on: ${{ inputs.fail-on }}
+          artifact-name: checkhere-action-smoke
+
+      - name: Show action outputs
+        if: ${{ always() }}
+        run: |
+          echo "passed=${{ steps.checkhere.outputs.passed }}"
+          echo "score=${{ steps.checkhere.outputs.score }}"
+          echo "html_report=${{ steps.checkhere.outputs['html-report'] }}"

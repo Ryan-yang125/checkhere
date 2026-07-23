@@ -1,0 +1,53 @@
+name: False positive or missed issue
+description: Improve a browser check with reproducible evidence.
+title: "[Check]: "
+labels:
+  - scanner
+body:
+  - type: input
+    id: code
+    attributes:
+      label: Issue code
+      description: Use the stable report code, or write MISSING when CheckHere missed the issue.
+      placeholder: MOBILE_OVERFLOW
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Finding type
+      options:
+        - False positive
+        - Missed issue
+        - Wrong severity
+        - Duplicate noise
+        - Unclear evidence or recommendation
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Reproduction and evidence
+      description: Prefer a small HTML fixture or public reproduction. Remove private and sensitive data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected detection behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: CheckHere version
+      placeholder: 0.4.0
+    validations:
+      required: true
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Fixture
+      options:
+        - label: I can open a pull request with a synthetic fixture.
+          required: false

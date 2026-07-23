@@ -1,0 +1,82 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify source
+        run: |
+          npm test
+          npm run check
+          npm run build
+
+      - name: Build release assets
+        id: assets
+        run: |
+          set -Eeuo pipefail
+          mkdir -p dist-release
+          npm pack -w checkhere --pack-destination dist-release
+          tarball="$(find dist-release -maxdepth 1 -type f -name 'checkhere-*.tgz' -print -quit)"
+          if [[ -z "$tarball" ]]; then
+            echo "npm pack did not create dist-release/checkhere-*.tgz" >&2
+            exit 1
+          fi
+          (cd skills && zip -qr ../dist-release/checkhere-skill.zip checkhere)
+          cp dist-release/checkhere-skill.zip dist-release/checkhere.skill
+          (cd dist-release && sha256sum checkhere-*.tgz checkhere-skill.zip checkhere.skill > SHA256SUMS.txt)
+          echo "tarball=$tarball" >> "$GITHUB_OUTPUT"
+
+      - name: Verify packaged CLI
+        run: |
+          npm install --global "${{ steps.assets.outputs.tarball }}"
+          checkhere --version
+          checkhere doctor
+
+      - name: Attest release assets
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist-release/checkhere-*.tgz
+            dist-release/checkhere-skill.zip
+            dist-release/checkhere.skill
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist-release/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" dist-release/* --verify-tag --generate-notes --title "CheckHere $GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY"
+          fi
+
+    defaults:
+      run:
+        shell: bash

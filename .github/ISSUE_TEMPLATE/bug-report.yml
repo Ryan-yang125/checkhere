@@ -1,0 +1,71 @@
+name: Bug report
+description: Report a reproducible CLI, scanner, reporter, Skill, or Action problem.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve CheckHere. Remove tokens, private URLs, personal data, and sensitive report evidence before submitting.
+  - type: input
+    id: version
+    attributes:
+      label: CheckHere version
+      placeholder: 0.4.0
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - CLI
+        - Scanner
+        - HTML report
+        - Markdown or JSON report
+        - Agent Skill
+        - GitHub Action
+        - Installation
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include commands, a synthetic fixture, or a public URL that is safe to share.
+      placeholder: |
+        1. Run ...
+        2. Open ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Add sanitized output or report issue codes.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: macOS 15, Node 20.19, Chromium installed by checkhere setup
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed secrets, personal information, and private website content.
+          required: true
+        - label: I searched existing issues for the same problem.
+          required: true

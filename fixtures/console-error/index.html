@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Console Error</title>
+</head>
+<body>
+  <main><h1>Console Error</h1><p>This page throws after load.</p></main>
+  <script>
+    console.error("fixture console error");
+    setTimeout(() => { throw new Error("fixture page error"); }, 100);
+  </script>
+</body>
+</html>

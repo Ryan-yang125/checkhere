@@ -1,0 +1,40 @@
+name: Feature request
+description: Propose a focused improvement to local website release checks.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What release-checking task is difficult today, and who experiences it?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Real-world evidence
+      description: Share recurring examples, sanitized reports, or fixture ideas.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the smallest useful CLI, report, Skill, or Action change.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Project fit
+      options:
+        - label: This can run locally or on the user's own CI runner.
+          required: true
+        - label: This does not require CheckHere-hosted accounts, payments, or monitoring.
+          required: true

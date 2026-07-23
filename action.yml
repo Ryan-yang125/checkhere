@@ -1,0 +1,180 @@
+name: CheckHere local browser release gate
+author: Ryan-yang125
+description: Run CheckHere and Chromium locally on a GitHub runner, enforce a release gate, and upload the complete browser report.
+
+inputs:
+  url:
+    description: URL to check, including a preview deployment or a service reachable from the runner.
+    required: true
+  package:
+    description: npm package spec or GitHub Release tarball URL used to install the CheckHere CLI.
+    required: false
+    default: https://github.com/Ryan-yang125/checkhere/releases/download/v0.4.0/checkhere-0.4.0.tgz
+  fail-on:
+    description: "Gate policy: never, critical, fix_soon, score:N, or page-score:N."
+    required: false
+    default: critical
+  routes:
+    description: Optional route-list path, relative to working-directory.
+    required: false
+    default: ""
+  routes-only:
+    description: Scan only filtered routes from the routes file; the URL is used as the base for relative routes.
+    required: false
+    default: "false"
+  max-routes:
+    description: Auto-sampled route budget, or total explicit-route cap when routes-only is true.
+    required: false
+    default: "3"
+  only:
+    description: Optional substring filter for route inclusion.
+    required: false
+    default: ""
+  skip:
+    description: Optional substring filter for route exclusion.
+    required: false
+    default: ""
+  working-directory:
+    description: Directory in the repository from which CheckHere runs.
+    required: false
+    default: .
+  setup-with-deps:
+    description: Install Linux system dependencies together with Chromium.
+    required: false
+    default: "true"
+  upload-artifact:
+    description: Upload the complete report bundle, screenshots, Markdown, JSON, and CLI logs.
+    required: false
+    default: "true"
+  artifact-name:
+    description: Name of the uploaded report artifact.
+    required: false
+    default: checkhere-report
+  retention-days:
+    description: Number of days to retain the report artifact.
+    required: false
+    default: "7"
+
+outputs:
+  passed:
+    description: Whether the selected release gate passed.
+    value: ${{ steps.check.outputs.passed }}
+  score:
+    description: CheckHere site score from 0 through 100.
+    value: ${{ steps.check.outputs.score }}
+  html-report:
+    description: Local HTML report path inside the runner and uploaded artifact.
+    value: ${{ steps.check.outputs['html-report'] }}
+  markdown-report:
+    description: Local agent-readable Markdown report path inside the runner and uploaded artifact.
+    value: ${{ steps.check.outputs['markdown-report'] }}
+  json-report:
+    description: Local canonical JSON report path inside the runner and uploaded artifact.
+    value: ${{ steps.check.outputs['json-report'] }}
+  report-directory:
+    description: Local directory containing the collected report bundle.
+    value: ${{ steps.check.outputs['report-directory'] }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install CheckHere
+      shell: bash
+      env:
+        CHECKHERE_PACKAGE: ${{ inputs.package }}
+        CHECKHERE_SETUP_WITH_DEPS: ${{ inputs.setup-with-deps }}
+      run: |
+        set -Eeuo pipefail
+        if [[ -z "$CHECKHERE_PACKAGE" || "$CHECKHERE_PACKAGE" == *$'\n'* || "$CHECKHERE_PACKAGE" == *$'\r'* ]]; then
+          echo "Invalid CheckHere package spec" >&2
+          exit 2
+        fi
+        npm install --global "$CHECKHERE_PACKAGE"
+        if [[ "$CHECKHERE_SETUP_WITH_DEPS" == "true" ]]; then
+          checkhere setup --with-deps
+        else
+          checkhere setup
+        fi
+        checkhere --version
+
+    - name: Run CheckHere release gate
+      id: check
+      shell: bash
+      env:
+        CHECKHERE_TARGET_URL: ${{ inputs.url }}
+        CHECKHERE_FAIL_ON: ${{ inputs.fail-on }}
+        CHECKHERE_ROUTES: ${{ inputs.routes }}
+        CHECKHERE_ROUTES_ONLY: ${{ inputs.routes-only }}
+        CHECKHERE_MAX_ROUTES: ${{ inputs.max-routes }}
+        CHECKHERE_ONLY: ${{ inputs.only }}
+        CHECKHERE_SKIP: ${{ inputs.skip }}
+        CHECKHERE_WORKING_DIRECTORY: ${{ inputs.working-directory }}
+        CHECKHERE_ARTIFACT_NAME: ${{ inputs.artifact-name }}
+      run: |
+        set -uo pipefail
+        workdir="$GITHUB_WORKSPACE/$CHECKHERE_WORKING_DIRECTORY"
+        artifact_dir="$GITHUB_WORKSPACE/.checkhere-action"
+        if [[ ! -d "$workdir" ]]; then
+          echo "CheckHere working directory does not exist: $workdir" >&2
+          exit 2
+        fi
+        if [[ ! "$CHECKHERE_MAX_ROUTES" =~ ^([0-9]|1[0-9]|20)$ ]]; then
+          echo "max-routes must be an integer from 0 through 20" >&2
+          exit 2
+        fi
+        if [[ "$CHECKHERE_ROUTES_ONLY" != "true" && "$CHECKHERE_ROUTES_ONLY" != "false" ]]; then
+          echo "routes-only must be true or false" >&2
+          exit 2
+        fi
+        if [[ "$CHECKHERE_ROUTES_ONLY" == "true" && -z "$CHECKHERE_ROUTES" ]]; then
+          echo "routes-only requires the routes input" >&2
+          exit 2
+        fi
+        if [[ "$CHECKHERE_ROUTES_ONLY" == "true" && "$CHECKHERE_MAX_ROUTES" == "0" ]]; then
+          echo "max-routes must be at least 1 when routes-only is true" >&2
+          exit 2
+        fi
+        mkdir -p "$artifact_dir"
+        args=(ci "$CHECKHERE_TARGET_URL" --fail-on "$CHECKHERE_FAIL_ON" --max-routes "$CHECKHERE_MAX_ROUTES" --markdown-out "$artifact_dir/report.md" --summary-out "$artifact_dir/summary.json")
+        if [[ -n "$CHECKHERE_ROUTES" ]]; then
+          routes_path="$workdir/$CHECKHERE_ROUTES"
+          if [[ ! -f "$routes_path" ]]; then
+            echo "CheckHere routes file does not exist: $routes_path" >&2
+            exit 2
+          fi
+          args+=(--routes "$routes_path")
+        fi
+        if [[ "$CHECKHERE_ROUTES_ONLY" == "true" ]]; then
+          args+=(--routes-only)
+        fi
+        if [[ -n "$CHECKHERE_ONLY" ]]; then
+          args+=(--only "$CHECKHERE_ONLY")
+        fi
+        if [[ -n "$CHECKHERE_SKIP" ]]; then
+          args+=(--skip "$CHECKHERE_SKIP")
+        fi
+        cd "$workdir"
+        set +e
+        checkhere "${args[@]}" 2> >(tee "$artifact_dir/cli-stderr.log" >&2) | tee "$artifact_dir/cli-output.json"
+        check_status=${PIPESTATUS[0]}
+        set -e
+        node "$GITHUB_ACTION_PATH/.github/scripts/collect-action-results.mjs" "$artifact_dir" "$check_status" "$CHECKHERE_ARTIFACT_NAME"
+        exit "$check_status"
+
+    - name: Upload CheckHere report
+      if: ${{ always() && inputs.upload-artifact == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ github.workspace }}/.checkhere-action
+        if-no-files-found: warn
+        retention-days: ${{ inputs.retention-days }}
+
+branding:
+  icon: check-circle
+  color: blue
