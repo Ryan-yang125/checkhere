@@ -14,7 +14,7 @@
     "@checkhere/shared": "0.4.0",
     "chrome-launcher": "^1.2.1",
     "fast-xml-parser": "^5.10.1",
-    "lighthouse": "^12.6.1",
+    "lighthouse": "^13.4.1",
     "playwright": "1.61.1"
   },
   "devDependencies": {
