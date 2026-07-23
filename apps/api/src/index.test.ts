@@ -87,6 +87,7 @@ describe('CheckHere documentation Worker', () => {
 
     expect(llmsBody).toContain('local-first');
     expect(llmsBody).toContain('/docs/github-actions');
+    expect(llmsBody).toContain('https://skills.sh/ryan-yang125/checkhere/checkhere');
     expect(llmsBody).not.toContain('VPS');
     expect(llmsBody).not.toContain('hosted');
     expect(sitemapBody).toContain('<loc>https://checkhere.page/guides/ai-website-launch-checklist</loc>');

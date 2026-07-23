@@ -12,6 +12,12 @@ gh skill install Ryan-yang125/checkhere checkhere@v0.4.0 --agent codex --scope u
 
 Use `--agent claude-code` for Claude Code. The skill argument is positional in GitHub CLI 2.96; `--skill` is not part of the command syntax.
 
+The Skill is also indexed on [skills.sh](https://skills.sh/ryan-yang125/checkhere/checkhere):
+
+```bash
+npx skills add Ryan-yang125/checkhere --skill checkhere --agent codex -y
+```
+
 ## Codex
 
 Copy the complete skill directory into the user skill folder:

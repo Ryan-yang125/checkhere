@@ -3,6 +3,7 @@
 [![CI](https://github.com/Ryan-yang125/checkhere/actions/workflows/ci.yml/badge.svg)](https://github.com/Ryan-yang125/checkhere/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Ryan-yang125/checkhere)](https://github.com/Ryan-yang125/checkhere/releases/latest)
 [![License](https://img.shields.io/github/license/Ryan-yang125/checkhere)](LICENSE)
+[![skills.sh](https://skills.sh/b/Ryan-yang125/checkhere)](https://skills.sh/ryan-yang125/checkhere/checkhere)
 
 **The final local browser check for AI-built websites.**
 
@@ -63,6 +64,7 @@ Install the portable CheckHere Agent Skill with a recent GitHub CLI:
 ```bash
 gh skill install Ryan-yang125/checkhere checkhere --agent codex --scope user
 gh skill install Ryan-yang125/checkhere checkhere --agent claude-code --scope user
+npx skills add Ryan-yang125/checkhere --skill checkhere --agent codex -y
 ```
 
 The Skill guides an agent through the full release loop: run CheckHere locally, open the HTML evidence for the user, read the Markdown/JSON findings, fix authorized issues, redeploy, and run the check again.

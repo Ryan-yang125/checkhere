@@ -74,7 +74,7 @@ const DOC_PAGES: Record<string, DocPage> = {
       {
         heading: '获取 Skill',
         paragraphs: ['Skill 源文件随开源仓库发布，目录遵循 Agent Skills 的 SKILL.md 结构。安装方式和最新兼容列表以仓库说明为准。'],
-        code: 'https://github.com/Ryan-yang125/checkhere/tree/main/skills/checkhere'
+        code: 'gh skill install Ryan-yang125/checkhere checkhere@v0.4.0 --agent codex --scope user\nnpx skills add Ryan-yang125/checkhere --skill checkhere --agent codex -y'
       },
       {
         heading: '交给 Agent 的一句话',
@@ -530,6 +530,7 @@ function llmsTxt(base: string, method: string): Response {
     '',
     '- GitHub: ' + GITHUB_URL,
     '- Releases: ' + GITHUB_URL + '/releases',
+    '- Skills.sh: https://skills.sh/ryan-yang125/checkhere/checkhere',
     '- License: ' + GITHUB_URL + '/blob/main/LICENSE',
     '',
     '## Install and run',
