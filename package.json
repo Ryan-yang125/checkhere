@@ -13,7 +13,7 @@
   "scripts": {
     "build": "npm run build --workspaces --if-present",
     "check": "tsc -b",
-    "test": "vitest run",
+    "test": "npm run build && vitest run",
     "test:watch": "vitest",
     "cli": "tsx packages/cli/src/index.ts",
     "api:dev": "wrangler dev apps/api/src/index.ts --config apps/api/wrangler.jsonc",

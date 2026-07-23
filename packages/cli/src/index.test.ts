@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
-const cliPath = path.join(rootDir, "packages/cli/src/index.ts");
+const cliPath = path.join(rootDir, "packages/cli/dist/checkhere.js");
 
 let server: Awaited<ReturnType<typeof startSiteServer>>;
 let tempDir: string;
@@ -142,7 +142,7 @@ describe("checkhere cli", () => {
 
 async function runCli(args: string[]): Promise<{ code: number | null; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
-    const child = spawn(process.execPath, ["--import", "tsx", cliPath, ...args], {
+    const child = spawn(process.execPath, [cliPath, ...args], {
       cwd: rootDir,
       stdio: ["ignore", "pipe", "pipe"]
     });

@@ -38,7 +38,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "prepack": "npm run build",
-    "test": "vitest run --root ../.. packages/cli/src/index.test.ts"
+    "test": "npm run build && vitest run --root ../.. packages/cli/src/index.test.ts"
   },
   "dependencies": {
     "chrome-launcher": "1.2.1",
