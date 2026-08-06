@@ -15,7 +15,7 @@
     "chrome-launcher": "^1.2.1",
     "fast-xml-parser": "^5.10.1",
     "lighthouse": "^12.6.1",
-    "playwright": "1.61.1"
+    "playwright": "1.62.1"
   },
   "devDependencies": {
     "@types/node": "^26.1.1"
