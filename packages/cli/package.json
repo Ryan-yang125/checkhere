@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "chrome-launcher": "1.2.1",
-    "fast-xml-parser": "5.10.1",
+    "fast-xml-parser": "5.11.0",
     "lighthouse": "12.6.1",
     "playwright": "1.61.1"
   },
