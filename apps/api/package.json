@@ -7,6 +7,6 @@
     "test": "vitest run --root ../.. apps/api/src/index.test.ts"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^5.20260721.1"
+    "@cloudflare/workers-types": "^5.20260823.1"
   }
 }
